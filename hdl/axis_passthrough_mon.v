@@ -160,7 +160,7 @@ begin
     begin
         if((s_axis_tvalid ==1'b1) && (s_axis_tlast==1'b1) && (m_axis_tready ==1'b1)) 
         begin
-            col <= stream_invalid ? 16'b0 : col_cnt + 1'b1;
+            col <= col_cnt + 1'b1;
             col_cnt <= 16'b0;
         end
         else if((s_axis_tvalid ==1'b1) && (m_axis_tready==1'b1))
@@ -187,7 +187,7 @@ begin
         end
         else if((s_axis_tvalid ==1'b1) && (m_axis_tready==1'b1) && (m_axis_tuser[0]==1'b1))
         begin
-            line <= stream_invalid ? 16'b0 : line_cnt;
+            line <= line_cnt;
             line_cnt <= 16'b0;    
         end
     end
@@ -199,9 +199,9 @@ end
 		.C_S_AXI_DATA_WIDTH(C_S00_AXI_DATA_WIDTH),
 		.C_S_AXI_ADDR_WIDTH(C_S00_AXI_ADDR_WIDTH)
 	) AXI_LITE_REG_v1_0_S00_AXI_inst (
-	    .col(col),
-        .line(line),
-        .fps(fps),
+	    .col(stream_invalid ? 32'b0 : col),
+        .line(stream_invalid ? 32'b0 : line),
+        .fps(stream_invalid ? 32'b0 : fps),
 		.S_AXI_ACLK(s00_axi_aclk),
 		.S_AXI_ARESETN(s00_axi_aresetn),
 		.S_AXI_AWADDR(s00_axi_awaddr),
