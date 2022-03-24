@@ -106,6 +106,7 @@ reg [31:0] fps;
 (* DONT_TOUCH = "yes", s="true",keep="true" *) (*MARK_DEBUG="TRUE"*)reg [31:0] fps_cnt;
 wire frame_end;
 reg [TUSER_WIDTH-1:0] m_axis_tuser_r;
+reg stream_invalid;
 always@(posedge aclk)
 begin
     m_axis_tuser_r <= m_axis_tuser;
@@ -117,11 +118,20 @@ begin
     begin
         fps <= 32'd0;
         fps_cnt <= 32'd0;
+        stream_invalid <= 1'b0;
     end
     else
     begin
         if(freq_sec_flag)
         begin
+            if(fps_cnt<32'd3)
+            begin
+                stream_invalid <= 1'b1;
+            end
+            else
+            begin
+                stream_invalid <= 1'b0;
+            end
             fps <= fps_cnt;
             fps_cnt <= 32'd0;
         end
@@ -150,7 +160,7 @@ begin
     begin
         if((s_axis_tvalid ==1'b1) && (s_axis_tlast==1'b1) && (m_axis_tready ==1'b1)) 
         begin
-            col <= col_cnt + 1'b1;
+            col <= stream_invalid ? 16'b0 : col_cnt + 1'b1;
             col_cnt <= 16'b0;
         end
         else if((s_axis_tvalid ==1'b1) && (m_axis_tready==1'b1))
@@ -177,7 +187,7 @@ begin
         end
         else if((s_axis_tvalid ==1'b1) && (m_axis_tready==1'b1) && (m_axis_tuser[0]==1'b1))
         begin
-            line <= line_cnt;
+            line <= stream_invalid ? 16'b0 : line_cnt;
             line_cnt <= 16'b0;    
         end
     end
